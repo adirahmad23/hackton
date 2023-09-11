@@ -37,7 +37,7 @@
         }
 
         #recognize-button {
-            margin: 90px 270px;
+            margin: 280px;
             padding: 20px 80px;
             display: flex;
             justify-content: center;
@@ -71,14 +71,13 @@
 
         .rounded-button {
             border-radius: 20px;
+            /* Sesuaikan angka ini sesuai dengan sudut yang Anda inginkan */
             background-color: #3498db;
             color: #fff;
+            padding: 10px 20px;
             font-size: 18px;
             cursor: pointer;
             border: none;
-            text-align: center;
-            margin-top: 370px;
-            margin-left: -80px;
         }
 
         .footer {
@@ -90,23 +89,9 @@
             bottom: 0;
         }
 
-        .sop {
-            color: #fff;
-            text-align: center;
-            margin-top: 370px;
-            margin-left: -80px;
-        }
-
         .footer-content {
             max-width: 1200px;
             margin: 0 auto;
-        }
-
-        .landing {
-            color: #04A1E3;
-            font-size: 105px;
-            font-display: bold;
-
         }
     </style>
 </head>
@@ -118,20 +103,21 @@
     </div>
     </div>
     <div class="content">
-        <h1 class="landing">
-            <br>
-            INTELLIGENCE
-            <br>
-            SAFETY
-            <br>
-            INSPECTION
-        </h1>
-        <div class="sop">
-            <div class="sop-content">
-                <img src="{{ url_for('static', filename='sop.png') }}" alt="ISAFE Logo" width="111%" height="auto">
-            </div>
+        <div id="video-container">
+            <img src="{{ url_for('video_feed_barcode') }}" class="responsive-img">
         </div>
-        <button onclick="window.location.href='/scan'" id="recognize-button" class="rounded-button">Mulai</button>
+        <div id="label-container">
+            <p id="label-text">{{ label_text }}</p>
+        </div>
+
+        <script>
+            // JavaScript untuk mengubah teks label pada halaman web
+            function updateLabel(label) {
+                var labelText = document.getElementById('label-text');
+                labelText.innerHTML = label;
+            }
+        </script>
+        <button onclick="window.location.href='/face'" id="recognize-button" class="rounded-button">SCAN ID</button>
 
     </div>
 

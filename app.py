@@ -26,7 +26,7 @@ model.train(images, np.array(labels))
 model.save("lbph_model.yml")
 model.read("lbph_model.yml")
 
-cap = cv2.VideoCapture(2)
+cap = cv2.VideoCapture(0)
 
 def generate_frames():
     while True:
