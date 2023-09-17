@@ -10,7 +10,7 @@ def capture_images(name):
     os.makedirs("my_face", exist_ok=True)
     
     i = 0
-    while i < 70:
+    while i <= 300:
         ret, frame = cap.read()
         frame = cv2.flip(frame, 1)
         if ret:

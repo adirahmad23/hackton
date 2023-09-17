@@ -27,9 +27,12 @@
 
         #video-container {
             max-width: 100%;
-            margin: 100 auto;
-            transform: rotate(90deg);
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
 
         #video {
             width: auto;
@@ -64,7 +67,7 @@
         }
 
         .image-container img {
-            max-width:25%;
+            max-width: 25%;
             height: auto;
 
         }
@@ -117,12 +120,12 @@
                 labelText.innerHTML = label;
             }
         </script>
-                <button onclick="window.location.href='/apd'" id="recognize-button" class="rounded-button">Face</button>
+        <button onclick="window.location.href='/apd'" id="recognize-button" class="rounded-button">Face</button>
     </div>
 
     <footer class="footer">
         <div class="footer-content">
-         <img src="{{ url_for('static', filename='fotter.png') }}" alt="ISAFE Logo" width="1080px" height="120px">
+            <img src="{{ url_for('static', filename='fotter.png') }}" alt="ISAFE Logo" width="1080px" height="120px">
         </div>
     </footer>
 
