@@ -106,8 +106,10 @@
         <div id="video-container">
             <img src="{{ url_for('video_feed_barcode') }}" class="responsive-img">
         </div>
+      
+        <button onclick="window.location.href='/face'" id="recognize-button" class="rounded-button">SCAN ID</button>
         <div id="label-container">
-            <p id="label-text">{{ label_text }}</p>
+            <input type="text" id="myDataInput" name="myDataInput" value="{{ myData }}">
         </div>
 
         <script>
@@ -117,8 +119,6 @@
                 labelText.innerHTML = label;
             }
         </script>
-        <button onclick="window.location.href='/face'" id="recognize-button" class="rounded-button">SCAN ID</button>
-
     </div>
 
     <footer class="footer">

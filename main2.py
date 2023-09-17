@@ -45,7 +45,7 @@ def generate_frames():
 
 @app.route('/barcode')
 def index():
-    return render_template('barcode.html')
+    return render_template('barcode.php')
 
 @app.route('/video_feed')
 def video_feed():

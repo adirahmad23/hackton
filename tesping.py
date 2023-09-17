@@ -6,7 +6,7 @@ from pyzbar.pyzbar import decode
 
 app = Flask(__name__)
 
-# Inisialisasi objek pemindaian kode batang
+
 barcode_cap = cv2.VideoCapture(0)
 barcode_cap.set(3, 640)
 barcode_cap.set(4, 480)
@@ -17,7 +17,7 @@ with open('dataIdFile.text') as f:
 with open('dataIdVisitor.text') as g:
     dataIdVisitor = g.read().splitlines()
 
-# Inisialisasi objek pengenalan wajah
+
 face_cascade = cv2.CascadeClassifier('haarcascades/haarcascade_frontalface_default.xml')
 model = cv2.face_LBPHFaceRecognizer.create()
 dataset_folder = "dataset/"
@@ -98,7 +98,7 @@ def video_feed_barcode():
 
 @app.route('/scan')
 def scan():
-    return render_template('barcode.php')
+    return render_template('barcode.php' )
 
 @app.route('/face')
 def face():
