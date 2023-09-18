@@ -108,18 +108,19 @@
     <div class="content">
         <div id="video-container">
             <img src="{{ url_for('video_feed_face') }}" class="responsive-img">
+            <input type="text" value="{{ datasend }}" id="label_text" readonly>
         </div>
-        <div id="label-container">
-            <p id="label-text">{{ label_text }}</p>
-        </div>
+ 
 
         <script>
-            // JavaScript untuk mengubah teks label pada halaman web
-            function updateLabel(label) {
-                var labelText = document.getElementById('label-text');
-                labelText.innerHTML = label;
-            }
-        </script>
+    const labelInput = document.getElementById('label_text');
+
+    const eventSource = new EventSource('/video_feed_face');
+    eventSource.onmessage = (event) => {
+        labelInput.value = event.data;
+    };
+</script>
+
         <button onclick="window.location.href='/apd'" id="recognize-button" class="rounded-button">Face</button>
     </div>
 

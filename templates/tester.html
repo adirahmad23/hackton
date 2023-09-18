@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Barcode Scanner</title>
+</head>
+
+<body>
+    <h1>Barcode Scanner</h1>
+    <div>
+        <label for="barcode-data">Data Barcode:</label>
+        <input type="text" value="{{ myData }}" id="barcode-data" readonly />
+    </div>
+
+    <img src="{{ url_for('video_feed_barcode') }}" alt="Barcode Scanner" />
+
+    <script>
+        // JavaScript untuk menampilkan data myData dari server
+        const barcodeDataElement = document.getElementById('barcode-data');
+
+        const eventSource = new EventSource('/video_feed_barcode');
+        eventSource.onmessage = (event) => {
+            const myData = event.data;
+
+            // Mengisi nilai elemen input teks dengan myData
+            barcodeDataElement.value = myData;
+        };
+    </script>
+
+</html>

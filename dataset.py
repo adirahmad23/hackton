@@ -4,9 +4,10 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
+cap = cv2.VideoCapture(0)
+
 # Fungsi untuk menangkap gambar
 def capture_images(name):
-    cap = cv2.VideoCapture(2, cv2.CAP_DSHOW)
     os.makedirs("my_face", exist_ok=True)
     
     i = 0
