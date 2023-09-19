@@ -6,6 +6,8 @@ from flask import Flask, render_template, Response
 from pyzbar.pyzbar import decode
 
 app = Flask(__name__)
+nama = ""
+barcode = ""
 
 cap = cv2.VideoCapture(0)
 cap.set(3, 640)
@@ -122,6 +124,7 @@ def draw_ped(img, label, x0, y0, xt, yt, color=(255, 127, 0), text_color=(255, 2
 
 
 def generate_face_frames():
+    global nama
     while cap.isOpened():
         ret, frame = cap.read()
         if ret:
@@ -135,7 +138,7 @@ def generate_face_frames():
 
                 idx, confidence = model.predict(face_img)
                 label_text = "%s (%.2f %%)" % (labels[idx], confidence)
-
+                nama = labels[idx] 
                 frame = draw_ped(frame, label_text, x, y, x + w, y + h,
                                  color=(0, 255, 255), text_color=(50, 50, 50))
 
@@ -149,6 +152,7 @@ def generate_face_frames():
 
 # barcode
 def generate_barcode_frames():
+    global barcode
     while True:
         success, img = cap.read()
         for barcode in decode(img):
@@ -162,7 +166,8 @@ def generate_barcode_frames():
             else:
                 myOutput = 'ID tidak terdaftar = ' + myData
                 myColor = (0, 0, 255)
-
+                
+            barcode = myData
             pts = np.array([barcode.polygon], np.int32)
             pts = pts.reshape((-1, 1, 2))
             cv2.polylines(img, [pts], True, myColor, 5)
@@ -202,6 +207,15 @@ def scan():
 def face():
     return render_template('face.php')
 
+@app.route('/get_nama')
+def get_nama():
+    global nama
+    return nama
+
+@app.route('/get_barcode')
+def get_barcode():
+    global barcode
+    return barcode
 
 if __name__ == "__main__":
     app.run(debug=True)

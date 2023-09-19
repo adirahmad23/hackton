@@ -6,8 +6,9 @@ from flask import Flask, render_template, Response
 from pyzbar.pyzbar import decode
 
 app = Flask(__name__)
+nama = ""
 
-cap = cv2.VideoCapture("video/adirahmad.mp4")
+cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
 
@@ -18,8 +19,6 @@ with open('dataIdVisitor.text') as g:
     dataIdVisitor = g.read().splitlines()
 
 
-# face recognition
-nama = ""
 def show_dataset(images_class, label):
     # show data for 1 class
     plt.figure(figsize=(14, 5))
@@ -79,7 +78,7 @@ for i, img in enumerate(images):
         croped_images.append(img)
         new_names.append(names[i])
 
-names = new_names  
+names = new_names
 
 
 for label in labels:
@@ -87,7 +86,7 @@ for label in labels:
     if len(ids) > 0:
         images_class = croped_images[ids[0]: ids[-1] + 1]
     else:
-        images_class = []  
+        images_class = []
 
 
 name_vec = np.array([np.where(name == labels)[0][0] for name in names])
@@ -124,33 +123,31 @@ def draw_ped(img, label, x0, y0, xt, yt, color=(255, 127, 0), text_color=(255, 2
 
 
 def generate_face_frames():
-    global sendLabel, nama
+    global nama
     while cap.isOpened():
         ret, frame = cap.read()
-        if ret:
-            # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(gray, 1.1, 5)
-            for (x, y, w, h) in faces:
-
+        if not  ret:
+            break
+        
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.1, 5)
+        
+        for (x, y, w, h) in faces:
                 face_img = gray[y:y+h, x:x+w]
                 face_img = cv2.resize(face_img, (100, 100))
-
                 idx, confidence = model.predict(face_img)
                 label_text = "%s (%.2f %%)" % (labels[idx], confidence)
-                nama = labels[idx] 
-                print(nama)
+                nama = labels[idx]  
+                
                 frame = draw_ped(frame, label_text, x, y, x + w, y + h,
-                                 color=(0, 255, 255), text_color=(50, 50, 50))
-        sendLabel = label_text
+                            color=(0, 255, 255), text_color=(50, 50, 50))
+                
         ret, buffer = cv2.imencode('.jpg', frame)
         if not ret:
-            break
+                break
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-
 # barcode
 def generate_barcode_frames():
     while True:
@@ -177,20 +174,13 @@ def generate_barcode_frames():
         ret, buffer = cv2.imencode('.jpg', img)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 # website konfigurasi
 @app.route('/')
 def index():
     return render_template('index.php')
-
-
-@app.route('/video_feed_face')
-def video_feed_face():
-    return Response(generate_face_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 @app.route('/video_feed_barcode')
 def video_feed_barcode():
@@ -201,12 +191,18 @@ def video_feed_barcode():
 def scan():
     return render_template('barcode.php')
 
-
 @app.route('/face')
 def face():
-     global sendLabel, nama  # Menggunakan variabel sendLabel dan nama yang didefinisikan di tingkat global
-     return render_template('face.php')
+    return render_template('face.php')
 
+@app.route('/video_feed_face')  
+def video_feed_face():
+    return Response(generate_face_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/get_nama')
+def get_nama():
+    global nama
+    return nama
+    
 if __name__ == "__main__":
     app.run(debug=True)

@@ -36,19 +36,29 @@
             height: auto;
         }
 
-        #recognize-button {
-            margin: 280px;
-            padding: 20px 80px;
+        .button-input {
+            margin-top: 240px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+        }
+
+        #barcodeInput {
+            font-size: 40px;
+            border: none;
+            text-align: center;
+            margin: 20px 0; /* Jarak atas dan bawah */
+        }
+
+        #recognize-button {
+            padding: 20px 80px;
             font-size: 30px;
             background-color: #3498db;
             color: #fff;
             border: none;
             cursor: pointer;
+            border-radius: 20px;
         }
-
 
         .responsive-img {
             width: 1000px;
@@ -93,6 +103,7 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
     </style>
 </head>
 
@@ -101,24 +112,15 @@
         <img src="{{ url_for('static', filename='sucofindo.png') }}" alt="Sucofindo Logo">
         <img src="{{ url_for('static', filename='Logo_ISAFE.png') }}" alt="ISAFE Logo">
     </div>
-    </div>
+
     <div class="content">
         <div id="video-container">
             <img src="{{ url_for('video_feed_barcode') }}" class="responsive-img">
         </div>
-      
-        <button onclick="window.location.href='/face'" id="recognize-button" class="rounded-button">SCAN ID</button>
-        <div id="label-container">
-            <input type="text" id="myDataInput" name="myDataInput" value="{{ myData }}">
+        <div class="button-input">
+            <input type="text" id="barcodeInput" placeholder="Hasil barcode" style="font-size: 40px;" disabled>
+            <button onclick="window.location.href='/face'" id="recognize-button" class="rounded-button">ID</button>
         </div>
-
-        <script>
-            // JavaScript untuk mengubah teks label pada halaman web
-            function updateLabel(label) {
-                var labelText = document.getElementById('label-text');
-                labelText.innerHTML = label;
-            }
-        </script>
     </div>
 
     <footer class="footer">
@@ -126,6 +128,22 @@
             <img src="{{ url_for('static', filename='fotter.png') }}" alt="ISAFE Logo" width="1080px" height="120px">
         </div>
     </footer>
+
+    <script>
+        const barcodeInputElement = document.getElementById('barcodeInput');
+
+        function updateBarcode() {
+            fetch('/get_barcode')
+                .then(response => response.text())
+                .then(data => {
+                    barcodeInputElement.value = data;
+                })
+                .catch(error => {
+                    console.error('Gagal mendapatkan barcode:', error);
+                });
+        }
+        setInterval(updateBarcode, 1000);
+    </script>
 
 </body>
 

@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Face Recognition Website</title>
-    <style>
-        body {
+    <style>body {
             margin: 0;
             padding: 0;
             background-color: #f0f0f0;
@@ -27,12 +26,9 @@
 
         #video-container {
             max-width: 100%;
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 100 auto;
+            transform: rotate(0deg);
         }
-
 
         #video {
             width: auto;
@@ -41,6 +37,7 @@
 
         #recognize-button {
             margin: 280px;
+            margin-top: 30px;
             padding: 20px 80px;
             display: flex;
             justify-content: center;
@@ -54,7 +51,7 @@
 
 
         .responsive-img {
-            width: 1000px;
+            width: 750px;
             height: auto;
         }
 
@@ -96,6 +93,12 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+
+        #namaInput {
+            font-size: 40px;
+            border: none; 
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -104,23 +107,12 @@
         <img src="{{ url_for('static', filename='sucofindo.png') }}" alt="Sucofindo Logo">
         <img src="{{ url_for('static', filename='Logo_ISAFE.png') }}" alt="ISAFE Logo">
     </div>
-    </div>
+
     <div class="content">
         <div id="video-container">
             <img src="{{ url_for('video_feed_face') }}" class="responsive-img">
-            <input type="text" value="{{ datasend }}" id="label_text" readonly>
+            <input type="text" id="namaInput" placeholder="Nama Anda" style="font-size: 40px;" disabled>
         </div>
- 
-
-        <script>
-    const labelInput = document.getElementById('label_text');
-
-    const eventSource = new EventSource('/video_feed_face');
-    eventSource.onmessage = (event) => {
-        labelInput.value = event.data;
-    };
-</script>
-
         <button onclick="window.location.href='/apd'" id="recognize-button" class="rounded-button">Face</button>
     </div>
 
@@ -129,6 +121,23 @@
             <img src="{{ url_for('static', filename='fotter.png') }}" alt="ISAFE Logo" width="1080px" height="120px">
         </div>
     </footer>
+
+
+    <script>
+                const namaInputElement = document.getElementById('namaInput');
+
+                function updateNama() {
+                    fetch('/get_nama')
+                        .then(response => response.text())
+                        .then(data => {
+                            namaInputElement.value = data;
+                        })
+                        .catch(error => {
+                            console.error('Gagal mendapatkan nama:', error);
+                        });
+                }
+                setInterval(updateNama, 1000);
+            </script>
 
 </body>
 
