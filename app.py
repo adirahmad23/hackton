@@ -10,8 +10,8 @@ nama = ""
 barcode = ""
 
 cap = cv2.VideoCapture(0)
-cap.set(3, 640)
-cap.set(4, 480)
+# cap.set(3, 640)
+# cap.set(4, 480)
 
 with open('dataIdFile.text') as f:
     dataIdWorker = f.read().splitlines()
@@ -131,16 +131,27 @@ def generate_face_frames():
             frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             faces = face_cascade.detectMultiScale(gray, 1.1, 5)
+        if len(faces) > 0:
             for (x, y, w, h) in faces:
 
                 face_img = gray[y:y+h, x:x+w]
                 face_img = cv2.resize(face_img, (100, 100))
 
                 idx, confidence = model.predict(face_img)
+                
+            if 0 <= idx < len(labels):
                 label_text = "%s (%.2f %%)" % (labels[idx], confidence)
-                nama = labels[idx] 
+                nama = labels[idx]
+                
+                # Gambar kotak dan teks deteksi wajah
                 frame = draw_ped(frame, label_text, x, y, x + w, y + h,
                                  color=(0, 255, 255), text_color=(50, 50, 50))
+            else:
+                # Jika idx di luar rentang label, set variabel nama ke kosong
+                nama = ""
+        else:
+            # Jika tidak ada deteksi wajah, set variabel nama ke kosong
+            nama = ""
 
         ret, buffer = cv2.imencode('.jpg', frame)
         if not ret:
@@ -153,28 +164,33 @@ def generate_face_frames():
 # barcode
 def generate_barcode_frames():
     global barcode
+    global data
+    barcode = ""
     while True:
         success, img = cap.read()
+        data = 0 
         for barcode in decode(img):
             myData = barcode.data.decode('utf-8')
             if myData in dataIdWorker:
                 myOutput = 'ID Pekerja = ' + myData
                 myColor = (0, 255, 0)
+                data =1
             elif myData in dataIdVisitor:
                 myOutput = 'ID Visitor = ' + myData
                 myColor = (255, 0, 0)
+                data =1
             else:
                 myOutput = 'ID tidak terdaftar = ' + myData
                 myColor = (0, 0, 255)
+                data =2
                 
-            barcode = myData
             pts = np.array([barcode.polygon], np.int32)
             pts = pts.reshape((-1, 1, 2))
             cv2.polylines(img, [pts], True, myColor, 5)
             pts2 = barcode.rect
             cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
                         0.9, myColor, 2)
-
+            barcode = myData
         ret, buffer = cv2.imencode('.jpg', img)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'

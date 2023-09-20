@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Face Recognition Website</title>
-    <style>body {
+    <style>
+        body {
             margin: 0;
             padding: 0;
             background-color: #f0f0f0;
@@ -49,7 +50,6 @@
             cursor: pointer;
         }
 
-
         .responsive-img {
             width: 750px;
             height: auto;
@@ -66,12 +66,10 @@
         .image-container img {
             max-width: 25%;
             height: auto;
-
         }
 
         .rounded-button {
             border-radius: 20px;
-            /* Sesuaikan angka ini sesuai dengan sudut yang Anda inginkan */
             background-color: #3498db;
             color: #fff;
             padding: 10px 20px;
@@ -96,7 +94,7 @@
 
         #namaInput {
             font-size: 40px;
-            border: none; 
+            border: none;
             text-align: center;
         }
     </style>
@@ -111,9 +109,10 @@
     <div class="content">
         <div id="video-container">
             <img src="{{ url_for('video_feed_face') }}" class="responsive-img">
-            <input type="text" id="namaInput" placeholder="Nama Anda" style="font-size: 40px;" disabled>
+            <input type="text" id="namaInput" placeholder="Tidak Ada Wajah Terdeteksi" style="font-size: 45px;"
+                disabled>
         </div>
-        <button onclick="window.location.href='/apd'" id="recognize-button" class="rounded-button">Face</button>
+        <button id="recognize-button" class="rounded-button">Face</button>
     </div>
 
     <footer class="footer">
@@ -122,22 +121,34 @@
         </div>
     </footer>
 
-
     <script>
-                const namaInputElement = document.getElementById('namaInput');
+        const namaInputElement = document.getElementById('namaInput');
+        const recognizeButton = document.getElementById('recognize-button');
 
-                function updateNama() {
-                    fetch('/get_nama')
-                        .then(response => response.text())
-                        .then(data => {
-                            namaInputElement.value = data;
-                        })
-                        .catch(error => {
-                            console.error('Gagal mendapatkan nama:', error);
-                        });
-                }
-                setInterval(updateNama, 1000);
-            </script>
+        function updateNama() {
+            fetch('/get_nama')
+                .then(response => response.text())
+                .then(data => {
+                    namaInputElement.value = data;
+
+                    // Periksa jika nilai input tidak null atau kosong
+                    if (data && data !== 'Tidak Ada Wajah Terdeteksi') {
+                        // Klik tombol "Face" secara otomatis
+                        recognizeButton.click();
+                    }
+                })
+                .catch(error => {
+                    console.error('Gagal mendapatkan nama:', error);
+                });
+        }
+        setInterval(updateNama, 1000);
+
+        // Fungsi untuk menangani klik tombol "Face"
+        recognizeButton.addEventListener('click', function () {
+            // Implementasikan logika atau aksi yang sesuai di sini
+            alert('Tombol "Face" diklik');
+        });
+    </script>
 
 </body>
 
