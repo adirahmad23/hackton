@@ -8,7 +8,7 @@ from pyzbar.pyzbar import decode
 app = Flask(__name__)
 nama = ""
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("video/adirahamad.mp4")
 cap.set(3, 640)
 cap.set(4, 480)
 

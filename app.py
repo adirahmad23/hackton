@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 from flask import Flask, render_template, Response
 from pyzbar.pyzbar import decode
 
@@ -78,10 +79,9 @@ for i, img in enumerate(images):
     img = detect_face(img, i)
     if img is not None:
         croped_images.append(img)
-        # Tambahkan nama yang sesuai dengan gambar yang terdeteksi
         new_names.append(names[i])
 
-names = new_names  # Gunakan list baru yang hanya berisi nama yang sesuai
+names = new_names  
 
 
 for label in labels:
@@ -143,19 +143,70 @@ def generate_face_frames():
                 label_text = "%s (%.2f %%)" % (labels[idx], confidence)
                 nama = labels[idx]
                 
-                # Gambar kotak dan teks deteksi wajah
                 frame = draw_ped(frame, label_text, x, y, x + w, y + h,
                                  color=(0, 255, 255), text_color=(50, 50, 50))
             else:
-                # Jika idx di luar rentang label, set variabel nama ke kosong
                 nama = ""
         else:
-            # Jika tidak ada deteksi wajah, set variabel nama ke kosong
             nama = ""
 
         ret, buffer = cv2.imencode('.jpg', frame)
         if not ret:
             break
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+#apd
+classes = json.load(open("dataset.json"))
+net = cv2.dnn.readNetFromONNX("best.onnx")  
+
+def generate_apd_frames():
+    while True:
+        _, img = cap.read()
+
+        blob = cv2.dnn.blobFromImage(img, scalefactor=1/255, size=[640, 640], mean=[0, 0, 0], swapRB=True, crop=False)
+        net.setInput(blob)
+        detections = net.forward()[0]
+
+        classes_ids = []
+        confidences = []
+        boxes = []
+        rows = detections.shape[0]
+
+        img_width, img_height = img.shape[1], img.shape[0]
+        x_scale = img_width/640
+        y_scale = img_height/640
+
+        for i in range(rows):
+            row = detections[i]
+            confidence = row[4]
+            if confidence > 0.2:
+                classes_score = row[5:]
+                ind = np.argmax(classes_score)
+                if classes_score[ind] > 0.2:
+                    classes_ids.append(ind)
+                    confidences.append(confidence)
+                    cx, cy, w, h = row[:4]
+                    x1 = int((cx-w/2)*x_scale)
+                    y1 = int((cy-h/2)*y_scale)
+                    width = int(w * x_scale)
+                    height = int(h * y_scale)
+                    box = np.array([x1, y1, width, height])
+                    boxes.append(box)
+
+        indices = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.2)
+
+        for i in indices:
+            x1, y1, w, h = boxes[i]
+            label = classes[classes_ids[i]]
+            conf = confidences[i]
+            text = label + "{:.2f}".format(conf)
+            cv2.rectangle(img, (x1, y1), (x1+w, y1+h), (255, 0, 0), 2)
+            cv2.putText(img, text, (x1, y1-2), cv2.FONT_HERSHEY_COMPLEX, 0.7, (0, 0, 255), 2)
+
+
+        _, buffer = cv2.imencode('.jpg', img)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -174,15 +225,12 @@ def generate_barcode_frames():
             if myData in dataIdWorker:
                 myOutput = 'ID Pekerja = ' + myData
                 myColor = (0, 255, 0)
-                data =1
             elif myData in dataIdVisitor:
                 myOutput = 'ID Visitor = ' + myData
                 myColor = (255, 0, 0)
-                data =1
             else:
                 myOutput = 'ID tidak terdaftar = ' + myData
                 myColor = (0, 0, 255)
-                data =2
                 
             pts = np.array([barcode.polygon], np.int32)
             pts = pts.reshape((-1, 1, 2))
@@ -191,6 +239,7 @@ def generate_barcode_frames():
             cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
                         0.9, myColor, 2)
             barcode = myData
+           
         ret, buffer = cv2.imencode('.jpg', img)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
@@ -213,6 +262,9 @@ def video_feed_face():
 def video_feed_barcode():
     return Response(generate_barcode_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
+@app.route('/video_feed_apd')
+def video_feed_apd():
+    return Response(generate_apd_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/scan')
 def scan():
@@ -232,6 +284,10 @@ def get_nama():
 def get_barcode():
     global barcode
     return barcode
+
+@app.route('/apd')
+def apd():
+    return render_template('apd.php')
 
 if __name__ == "__main__":
     app.run(debug=True)

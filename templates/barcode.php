@@ -130,20 +130,31 @@
     </footer>
 
     <script>
-        const barcodeInputElement = document.getElementById('barcodeInput');
+    const barcodeInputElement = document.getElementById('barcodeInput');
 
-        function updateBarcode() {
-            fetch('/get_barcode')
-                .then(response => response.text())
-                .then(data => {
-                    barcodeInputElement.value = data;
-                })
-                .catch(error => {
-                    console.error('Gagal mendapatkan barcode:', error);
-                });
-        }
-        setInterval(updateBarcode, 1000);
-    </script>
+    function updateBarcode() {
+        fetch('/get_barcode')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Permintaan gagal: ' + response.statusText);
+                }
+                return response.text();
+            })
+            .then(data => {
+                if (data) {
+                    // Jika ada data dalam input teks, arahkan ke halaman lain
+                    window.location.href = '/face'; // Ganti dengan URL halaman tujuan
+                }
+                barcodeInputElement.value = data;
+            })
+            .catch(error => {
+                console.error('Gagal mendapatkan barcode:', error);
+                barcodeInputElement.value = 'Gagal mendapatkan barcode'; // Menampilkan pesan kesalahan di input teks
+            });
+    }
+    setInterval(updateBarcode, 1000);
+</script>
+
 
 </body>
 

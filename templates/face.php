@@ -145,8 +145,8 @@
 
         // Fungsi untuk menangani klik tombol "Face"
         recognizeButton.addEventListener('click', function () {
-            // Implementasikan logika atau aksi yang sesuai di sini
-            alert('Tombol "Face" diklik');
+          
+            window.location.href = "/apd";
         });
     </script>
 
