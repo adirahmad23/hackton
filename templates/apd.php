@@ -28,7 +28,7 @@
         #video-container {
             max-width: 100%;
             margin: 100 auto;
-            transform: rotate(0deg);
+            transform: rotate(90deg);
         }
 
         #video {
@@ -72,7 +72,7 @@
             border-radius: 20px;
             background-color: #3498db;
             color: #fff;
-            padding: 10px 20px;
+            padding: 10px 10px;
             font-size: 18px;
             cursor: pointer;
             border: none;
@@ -108,10 +108,14 @@
 
     <div class="content">
         <div id="video-container">
-            <img id="video_stream" src="{{ url_for('video_feed_apd') }}" class="responsive-img">
-            <input type="text" id="namaInput" placeholder="Tidak Ada Wajah Terdeteksi" style="font-size: 45px;"
-                disabled>
+            <img id="video_stream" src="{{ url_for('video_feed_apd') }}" class="responsive-img"> 
         </div>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
         <button id="recognize-button" class="rounded-button">CETAK PDF</button>
     </div>
 

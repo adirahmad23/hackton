@@ -120,7 +120,7 @@
     <div class="content">
         <h1 class="landing">
             <br>
-            ARTIFICIAL INTELLIGENCE
+            ARTIFICIAL   INTELLIGENCE
             <br>
             SAFETY
             <br>
