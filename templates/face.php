@@ -109,6 +109,7 @@
     <div class="content">
         <div id="video-container">
             <img src="{{ url_for('video_feed_face') }}" class="responsive-img">
+            
             <input type="text" id="namaInput" placeholder="Tidak Ada Wajah Terdeteksi" style="font-size: 45px;" disabled>
         </div>
         <button id="recognize-button" class="rounded-button">Face</button>
@@ -132,9 +133,18 @@
 
                     // Periksa jika nilai input tidak null atau kosong
                     if (data && data !== 'Tidak Ada Wajah Terdeteksi') {
+                        // Tunggu selama 5 detik sebelum klik tombol "Face"
                         setTimeout(function() {
-                            recognizeButton.click();
+                            if (data && data == 'Tidak Ada Wajah Terdeteksi') {
+                                updateNama();
+
+                            } else {
+                                recognizeButton.click();
+                            }
                         }, 5000);
+                    } else {
+                        // Jika data nama tidak terdeteksi, panggil kembali updateNama
+                        updateNama();
                     }
                 })
                 .catch(error => {

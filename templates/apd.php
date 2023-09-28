@@ -28,7 +28,7 @@
         #video-container {
             max-width: 100%;
             margin: 100 auto;
-            transform: rotate(90deg);
+            /* transform: rotate(90deg); */
         }
 
         #video {
@@ -76,6 +76,7 @@
             font-size: 18px;
             cursor: pointer;
             border: none;
+            text-decoration: none;
         }
 
         .footer {
@@ -108,15 +109,42 @@
 
     <div class="content">
         <div id="video-container">
-            <img id="video_stream" src="{{ url_for('video_feed_apd') }}" class="responsive-img"> 
+        <form method="post" id="myForm">
+        <input type="submit" id="recognize-button" class="rounded-button" value="APD" >
+        <script>
+    </form>
+
+    <button id="recognize-button" class="rounded-button">Mulai</button>
+
+    <script>
+        $(document).ready(function () {
+            $("#recognize-button").click(function () {
+                window.location.href = '/scan';
+            });
+
+            if (e.keyCode == '38') {
+             window.location.href = '/scan';
+            }
+
+            // Event listener untuk tombol "M" di seluruh halaman
+            $(document).keypress(function (e) {
+                if (e.key === 'm' || e.key === 'M') {
+                    window.location.href = '/permite';
+                }
+            });
+        });
+    </script>
+
         </div>
         <br>
         <br>
         <br>
         <br>
         <br>
+        <input type="hidden" value="{{ databarcode }}">
+        <input type="hidden" value="{{ dataface }}">
         <br>
-        <button id="recognize-button" class="rounded-button">CETAK PDF</button>
+        <!-- <a href="{{ url_for('static', filename='SAFETY PERMIT_Ainul.pdf') }}" id="recognize-button" target="_blank" class="rounded-button">Cetak Pdf</a> -->
     </div>
 
     <footer class="footer">
@@ -125,20 +153,9 @@
         </div>
     </footer>
     
-    <script>
-        var video = document.getElementById('video_stream');
+    
 
-        function updateVideo() {
-            video.src = "{{ url_for('video_feed_apd') }}";
-            setTimeout(updateVideo, 1000);  // Update video every 1 second
-        }
-
-        updateVideo();
-    </script>
-
-    <script>
-      
-    </script>
+    
 
 </body>
 

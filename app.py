@@ -1,16 +1,18 @@
 import os
+import subprocess
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import json
-from flask import Flask, render_template, Response
+import time
+from flask import Flask, render_template, Response, request, redirect, url_for
 from pyzbar.pyzbar import decode
 
 app = Flask(__name__)
 nama = ""
 barcode = ""
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 # cap.set(3, 640)
 # cap.set(4, 480)
 
@@ -141,6 +143,7 @@ def generate_face_frames():
                 
             if 0 <= idx < len(labels):
                 label_text = "%s (%.2f %%)" % (labels[idx], confidence)
+                
                 nama = labels[idx]
                 
                 frame = draw_ped(frame, label_text, x, y, x + w, y + h,
@@ -153,60 +156,6 @@ def generate_face_frames():
         ret, buffer = cv2.imencode('.jpg', frame)
         if not ret:
             break
-        frame = buffer.tobytes()
-        yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-#apd
-classes = json.load(open("dataset.json"))
-net = cv2.dnn.readNetFromONNX("best.onnx")  
-
-def generate_apd_frames():
-    while True:
-        _, img = cap.read()
-
-        blob = cv2.dnn.blobFromImage(img, scalefactor=1/255, size=[640, 640], mean=[0, 0, 0], swapRB=True, crop=False)
-        net.setInput(blob)
-        detections = net.forward()[0]
-
-        classes_ids = []
-        confidences = []
-        boxes = []
-        rows = detections.shape[0]
-
-        img_width, img_height = img.shape[1], img.shape[0]
-        x_scale = img_width/640
-        y_scale = img_height/640
-
-        for i in range(rows):
-            row = detections[i]
-            confidence = row[4]
-            if confidence > 0.2:
-                classes_score = row[5:]
-                ind = np.argmax(classes_score)
-                if classes_score[ind] > 0.2:
-                    classes_ids.append(ind)
-                    confidences.append(confidence)
-                    cx, cy, w, h = row[:4]
-                    x1 = int((cx-w/2)*x_scale)
-                    y1 = int((cy-h/2)*y_scale)
-                    width = int(w * x_scale)
-                    height = int(h * y_scale)
-                    box = np.array([x1, y1, width, height])
-                    boxes.append(box)
-
-        indices = cv2.dnn.NMSBoxes(boxes, confidences, 0.2, 0.2)
-
-        for i in indices:
-            x1, y1, w, h = boxes[i]
-            label = classes[classes_ids[i]]
-            conf = confidences[i]
-            text = label + "{:.2f}".format(conf)
-            cv2.rectangle(img, (x1, y1), (x1+w, y1+h), (255, 0, 0), 2)
-            cv2.putText(img, text, (x1, y1-2), cv2.FONT_HERSHEY_COMPLEX, 0.7, (0, 0, 255), 2)
-
-
-        _, buffer = cv2.imencode('.jpg', img)
         frame = buffer.tobytes()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -245,7 +194,8 @@ def generate_barcode_frames():
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-
+print(barcode)
+print(nama)
 
 # website konfigurasi
 @app.route('/')
@@ -253,18 +203,14 @@ def index():
     return render_template('index.php')
 
 
-@app.route('/video_feed_face')
-def video_feed_face():
-    return Response(generate_face_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-
 
 @app.route('/video_feed_barcode')
 def video_feed_barcode():
     return Response(generate_barcode_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/video_feed_apd')
-def video_feed_apd():
-    return Response(generate_apd_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/video_feed_face')
+def video_feed_face():
+    return Response(generate_face_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route('/scan')
 def scan():
@@ -273,7 +219,7 @@ def scan():
 
 @app.route('/face')
 def face():
-    return render_template('face.php')
+    return render_template('face.php',databarcode=barcode)
 
 @app.route('/get_nama')
 def get_nama():
@@ -285,9 +231,24 @@ def get_barcode():
     global barcode
     return barcode
 
-@app.route('/apd')
+@app.route('/apd', methods=['GET', 'POST'])
 def apd():
-    return render_template('apd.php')
+    if request.method == 'POST':
+        working_directory = r'D:\web\safetyai\safetyai\FaceRecognition\yolooface'
+        command = ['python', 'detect.py', '--weights', 'best.pt', '--source', '0']
+
+        result = subprocess.run(command, cwd=working_directory)
+
+        if result.returncode == 0:
+            print("Perintah berhasil dijalankan.")
+        else:
+            print("Perintah gagal dijalankan.")
+
+    return render_template('apd.php', dataface=nama, databarcode=barcode)
+
+@app.route('/permite')
+def cetak_permite():
+   return render_template('permite.html')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=2170 , debug=True)

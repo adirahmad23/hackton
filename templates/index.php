@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Face Recognition Website</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -12,7 +13,7 @@
             background-color: #f0f0f0;
             font-family: Arial, sans-serif;
         }
-
+        
         .header {
             text-align: center;
             padding: 20px;
@@ -131,8 +132,25 @@
                 <img src="{{ url_for('static', filename='sop.png') }}" alt="ISAFE Logo" width="111%" height="auto">
             </div>
         </div>
-        <button onclick="window.location.href='/scan'" id="recognize-button" class="rounded-button">Mulai</button>
+        <input type="hidden" id="inputField" placeholder="Tekan Spasi untuk Mulai">
+    <button id="recognize-button" class="rounded-button">Mulai</button>
 
+    <script>
+  document.onkeydown = checkKey;
+
+function checkKey(e) {
+
+ e = e || window.event;
+
+   //angka tergantung yang mau diuji
+    // panah atas angka 38
+    if (e.keyCode == '38') {
+        window.location.href = '/scan';
+    }
+
+
+}
+    </script>
     </div>
 
     <footer class="footer">
